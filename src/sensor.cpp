@@ -28,9 +28,6 @@ float readChannel(ADS1115_MUX channel) {
     float voltage = 0.0;
     adc.setCompareChannels(channel);
     adc.startSingleMeasurement();
-    while (adc.isBusy()) {
-        // Blynk.run(); // Đảm bảo Blynk không bị treo
-    }
     voltage = adc.getResult_mV();
     return voltage;
 }
@@ -53,10 +50,5 @@ void readSensors() {
         sensor[i] = constrain(sensor[i], 0, 100);
     }
 
-    // // Gửi dữ liệu đến server Blynk
-    // Blynk.virtualWrite(V21, sensor[0]);
-    // Blynk.virtualWrite(V22, sensor[1]);
-    // Blynk.virtualWrite(V23, sensor[2]);
-    // Blynk.virtualWrite(V24, sensor[3]);
 }
 

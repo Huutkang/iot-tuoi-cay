@@ -12,6 +12,6 @@ void setupIrrigation(int RL[4]) {
 
 void manageIrrigation(int RL[4], bool status[4]) {
     for (int i = 0; i < 4; i++) {
-        digitalWrite(RL[i], status[i]);
+        digitalWrite(RL[i], !status[i]);
     }
 }

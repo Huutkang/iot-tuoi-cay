@@ -1,5 +1,5 @@
 #include "wifi_mqtt.h"
-// #include <WiFi.h>
+#include <WiFi.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
 #include <WiFiManager.h>
@@ -8,8 +8,8 @@
 
 
 // Cấu hình WiFi
-// const char* ssid = "XIAOXIN-PRO-14";
-// const char* password = "09032002";
+const char* ssid = "XIAOXIN-PRO-14";
+const char* password = "09032002";
 
 // Cấu hình HiveMQ Broker
 const char* mqtt_server = "da515a6f948a482bb656f7310841d60d.s1.eu.hivemq.cloud";
@@ -18,8 +18,7 @@ const char* mqtt_user = "huuthang";
 const char* mqtt_pass = "123456";
 
 // Chủ đề MQTT
-const char* light_topic = "greenhouse/light";
-const char* control_topic = "greenhouse/control";
+const char* control_topic = "control";
 
 // Chứng chỉ Root CA
 const char* ca_cert = R"~~~(
@@ -61,10 +60,11 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 
 bool isAuto[4] = {false, false, false, false};  // true: AUTO, false: false
 
-
 bool status[4] = {false, false, false, false};
 
+bool mqtt_connected = false;
 
+int count_connect_wifi = 0;
 
 // Định nghĩa MQTT và Wi-Fi
 WiFiClientSecure espClient;          // Đối tượng WiFiClient
@@ -85,7 +85,6 @@ void setupWiFi() {
         delay(3000);
         ESP.restart();  // Khởi động lại thiết bị
     }
-
     Serial.println("Đã kết nối Wi-Fi!");
 }
 
@@ -122,17 +121,25 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 
-void reconnectMQTT() {
+void connect_MQTT() {
     // Thử kết nối MQTT
-    while (!mqttClient.connected()) {
+    if (!mqttClient.connected()) {
         Serial.print("Đang kết nối MQTT...");
         if (mqttClient.connect("ESP32Client", mqtt_user, mqtt_pass)) {  // Đổi "ESP32Client" nếu cần đặt tên khác
+            mqtt_connected=true;
             Serial.println("Đã kết nối MQTT!");
             mqttClient.subscribe(control_topic);
         } else {
             Serial.print("Lỗi MQTT: ");
             Serial.println(mqttClient.state());
-            delay(2000);  // Chờ trước khi thử lại
+            if (WiFi.status() != WL_CONNECTED||count_connect_wifi>5) {
+                count_connect_wifi=0;
+                Serial.println("Lỗi wifi");
+                WiFi.reconnect();
+                Serial.println("đã chạy xong câu lệnh reconnect wifi");
+            }else{
+                count_connect_wifi++;
+            }
         }
     }
 }
@@ -145,19 +152,25 @@ void setupMQTT() {
     // Thiết lập kết nối MQTT
     mqttClient.setServer(mqtt_server, mqtt_port);
     mqttClient.setCallback(callback);
-    reconnectMQTT();
+    connect_MQTT();
 }
 
-void publishData(const char* topic, const char* payload) {
+bool publishData(const char* topic, const char* payload) {
     mqttClient.loop(); //
     // Gửi dữ liệu qua MQTT
     if (mqttClient.connected()) {
         mqttClient.publish(topic, payload);
+        return true;
     }else{
-        reconnectMQTT();
+        mqtt_connected = false;
+        return false;
     }
 }
 
 void handleMQTT() {
-    mqttClient.loop();  // Xử lý các tin nhắn đến/tương tác với MQTT server
+    if (mqttClient.connected()) {
+        mqttClient.loop();
+    }else{
+        mqtt_connected = false;
+    }
 }

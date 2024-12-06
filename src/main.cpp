@@ -9,13 +9,30 @@
 // const int SCL = 22; // esp32: D22, esp8288: D1
 // const int SDA = 21; // esp32: D21, esp8288: D2
 
-// Relay1. esp32: D34, esp8266: D4
-// Relay2. esp32: D35, esp8266: D5
-// Relay3. esp32: D32, esp8266: D6
-// Relay4. esp32: D33, esp8266: D7
+// Relay1. esp32: D32, esp8266: D4
+// Relay2. esp32: D33, esp8266: D5
+// Relay3. esp32: D26, esp8266: D6
+// Relay4. esp32: D25, esp8266: D7
 
-int RL[4] = {34, 35, 32, 33};
+int RL[4] = {32, 33, 25, 26};
 
+unsigned long current_time;
+unsigned long time1=0;
+unsigned long time2=0;
+unsigned long time3=0;
+unsigned long time4=0;
+
+
+int Timer(unsigned long *time, int wait){
+    current_time = millis();
+    if (current_time-*time>wait){
+        *time = current_time;
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
 
 // test
 void printSensorValues() {
@@ -30,21 +47,28 @@ void printSensorValues() {
 
 void setup() {
     Serial.begin(115200);
+    setupIrrigation(RL);          // Cấu hình hệ thống tưới cây
     setupWiFi();                  // Cấu hình WiFi
     setupMQTT();                  // Cấu hình MQTT
     setupSensors(SCL, SDA);       // Cấu hình cảm biến (ADC: ADS1115)
-    setupIrrigation(RL);    // Cấu hình hệ thống tưới cây
-    // test
-    status[1]=false;
-    isAuto[1]=true;
-    sensor[4]=1;
-    // test
+        
+
 }
 
 void loop() {
     handleMQTT();                 // Xử lý kết nối MQTT
-    readSensors();                // Đọc cảm biến và gửi dữ liệu
-    manageIrrigation(RL, status);           // Quản lý tưới cây
-    printSensorValues();
-    delay(1000);
+    if (Timer(&time1, 3000)){
+        if(!mqtt_connected){
+            connect_MQTT();
+        }
+    }
+    if (Timer(&time2,5000)){
+        readSensors();                // Đọc cảm biến và gửi dữ liệu
+    }
+    if (Timer(&time3,500)){
+        manageIrrigation(RL, status);
+    }
+    if (Timer(&time4,1000)){
+        publishData("abc", "xyz");
+    }
 }
