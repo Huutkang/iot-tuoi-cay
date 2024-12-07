@@ -1,5 +1,5 @@
 #include "time_sync.h"
-#include <WiFi.h>
+#include <ESP8266WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 

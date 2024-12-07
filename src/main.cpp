@@ -14,7 +14,7 @@
 // Relay3. esp32: D26, esp8266: D6
 // Relay4. esp32: D25, esp8266: D7
 
-int RL[4] = {32, 33, 25, 26};
+int RL[4] = {D4, D5, D6, D7};
 
 unsigned long current_time;
 unsigned long time1=0;
@@ -115,11 +115,11 @@ void loop() {
     if (Timer(&time5,1000)){
         checkAndActivateTimers();
         // In thời gian hiện tại (test)
-        Serial.print("Current time: ");
+        Serial.println("Current time: ");
         Serial.println(getCurrentTime());
 
         // In số giây từ đầu ngày (test)
-        Serial.print("Seconds since midnight: ");
+        Serial.println("Seconds since midnight: ");
         Serial.println(getSecondsSinceMidnight());
     }
     // Đồng bộ thời gian mỗi 15 phút

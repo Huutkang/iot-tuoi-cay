@@ -1,9 +1,10 @@
 #include "wifi_mqtt.h"
-#include <WiFi.h>
+// #include <WiFi.h>
+#include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
 #include <WiFiManager.h>
-
+#include <BearSSLHelpers.h>
 
 
 
@@ -52,7 +53,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 -----END CERTIFICATE-----
 )~~~";
 
-
+BearSSL::X509List cert(ca_cert);
 
 
 bool isAuto[4] = {true, true, true, true};  // true: AUTO, false: not AUTO
@@ -95,7 +96,7 @@ void setupWiFi() {
 
 void callback(char* topic, byte* payload, unsigned int length) {
     String message = "";
-    for (int i = 0; i < length; i++) {
+    for (unsigned int i = 0; i < length; i++) {
         message += (char)payload[i];
     }
 
@@ -168,8 +169,8 @@ void connect_MQTT() {
 
 
 void setupMQTT() {    
-    // Thiết lập chứng chỉ CA
-    espClient.setCACert(ca_cert);
+    BearSSL::WiFiClientSecure espClient;
+    espClient.setTrustAnchors(&cert); // Thiết lập chứng chỉ CA
 
     // Thiết lập kết nối MQTT
     mqttClient.setServer(mqtt_server, mqtt_port);
