@@ -7,10 +7,6 @@
 
 
 
-// Cấu hình WiFi
-const char* ssid = "XIAOXIN-PRO-14";
-const char* password = "09032002";
-
 // Cấu hình HiveMQ Broker
 const char* mqtt_server = "da515a6f948a482bb656f7310841d60d.s1.eu.hivemq.cloud";
 const int mqtt_port = 8883;
@@ -58,7 +54,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 
 
 
-bool isAuto[4] = {false, false, false, false};  // true: AUTO, false: false
+bool isAuto[4] = {true, true, true, true};  // true: AUTO, false: not AUTO
 
 bool status[4] = {false, false, false, false};
 
@@ -132,13 +128,16 @@ void connect_MQTT() {
         } else {
             Serial.print("Lỗi MQTT: ");
             Serial.println(mqttClient.state());
-            if (WiFi.status() != WL_CONNECTED||count_connect_wifi>5) {
+            if (WiFi.status() != WL_CONNECTED||count_connect_wifi>5) { // lâu lâu rõ ràng tắt wifi nhưng WiFi.status() vẫn là đang kết nối nên phải thêm cái biến đếm này
                 count_connect_wifi=0;
                 Serial.println("Lỗi wifi");
                 WiFi.reconnect();
                 Serial.println("đã chạy xong câu lệnh reconnect wifi");
             }else{
                 count_connect_wifi++;
+            }
+            for (int i=0; i<4; i++) {
+                isAuto[i]=true;
             }
         }
     }

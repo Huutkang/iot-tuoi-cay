@@ -2,7 +2,7 @@
 #include "wifi_mqtt.h"
 #include "sensor.h"
 #include "irrigation.h"
-
+#include "time_sync.h"
 
 
 // Đã được định nghĩa trong thư viện, không cần định nghĩa lại
@@ -21,6 +21,7 @@ unsigned long time1=0;
 unsigned long time2=0;
 unsigned long time3=0;
 unsigned long time4=0;
+unsigned long time5=0;
 
 
 int Timer(unsigned long *time, int wait){
@@ -48,12 +49,28 @@ void printSensorValues() {
 void setup() {
     Serial.begin(115200);
     setupIrrigation(RL);          // Cấu hình hệ thống tưới cây
+    setupTimeSync();
+    initializeTimers();
     setupWiFi();                  // Cấu hình WiFi
     setupMQTT();                  // Cấu hình MQTT
     setupSensors(SCL, SDA);       // Cấu hình cảm biến (ADC: ADS1115)
-        
 
+    // Ví dụ: Đặt hẹn giờ cho máy bơm 0 vào lúc 08:00:00
+    // SetWateringTimer(0, 0, 8 * 3600);
 }
+
+
+
+// logic tưới cấy:
+
+//     có hai chế độ là tự động và điều khiển bằng tay
+//     nếu mất kết nối thì tự động chuyển về chế độ tự động
+//     khi ở chế độ điều khiển bằng tay, người dùng tự bật lên thì tự tắt đi
+//     khi ở chế độ tự động, người dùng lập lịch tưới hàng ngày
+//     có hai giá trị độ ẩm là mix và max. ví dụ min=60 và max=90
+//     nếu độ ẩm bé hơn min thì tưới cây, nếu độ ẩm lớn hơn max thì không tưới, nếu độ ẩm nằm giữa min và mã thì tưới theo lịch
+
+
 
 void loop() {
     handleMQTT();                 // Xử lý kết nối MQTT
@@ -71,4 +88,16 @@ void loop() {
     if (Timer(&time4,1000)){
         publishData("abc", "xyz");
     }
+    if (Timer(&time5,1000)){
+        checkAndActivateTimers();
+        // In thời gian hiện tại (test)
+        Serial.print("Current time: ");
+        Serial.println(getCurrentTime());
+
+        // In số giây từ đầu ngày (test)
+        Serial.print("Seconds since midnight: ");
+        Serial.println(getSecondsSinceMidnight());
+    }
+    // Đồng bộ thời gian mỗi 15 phút
+    updateTimeSync();
 }
