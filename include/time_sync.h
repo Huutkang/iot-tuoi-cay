@@ -14,6 +14,7 @@ String getCurrentTime(); // Lấy thời gian trong ngày dưới dạng HH:MM:S
 unsigned long getSecondsSinceMidnight(); // Lấy số giây từ đầu ngày
 void initializeTimers();
 void SetWateringTimer(int pumpIndex, int timerIndex, unsigned long startTimeInSeconds);
+void ProcessTimerString(String& input);
 void checkAndActivateTimers();
 
 #endif

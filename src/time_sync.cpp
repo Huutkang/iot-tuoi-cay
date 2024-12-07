@@ -1,7 +1,7 @@
+#include "time_sync.h"
 #include <WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-#include "time_sync.h"
 
 
 
@@ -56,6 +56,48 @@ void SetWateringTimer(int pumpIndex, int timerIndex, unsigned long startTimeInSe
     pumpTimers[pumpIndex][timerIndex].startTime = startTimeInSeconds;
     pumpTimers[pumpIndex][timerIndex].isActive = true;
 }
+
+void ProcessTimerString(String& input) {
+    // Kiểm tra độ dài chuỗi đầu vào
+    if (input.length() < 3) {
+        input = ""; // Xóa chuỗi sau khi xử lý
+        return;
+    }
+
+    // Lấy số đầu tiên (2 số pumpIndex và timerIndex)
+    int pumpIndex = input[0] - '0'; // Số đầu tiên
+    int timerIndex = input[1] - '0'; // Số thứ hai
+
+    // Kiểm tra tính hợp lệ của pumpIndex và timerIndex
+    if (pumpIndex < 0 || pumpIndex >= 4 || timerIndex < 0 || timerIndex >= 4) {
+        Serial.println("Chỉ số máy bơm hoặc hẹn giờ không hợp lệ!");
+        input = ""; // Xóa chuỗi sau khi xử lý
+        return;
+    }
+
+    // Lấy phần còn lại sau khoảng trắng
+    String remaining = input.substring(2);
+    remaining.trim(); // Loại bỏ khoảng trắng thừa
+
+    if (remaining == "off") {
+        // Nếu chuỗi là "off", tắt bộ hẹn giờ
+        pumpTimers[pumpIndex][timerIndex].isActive = false;
+        Serial.println("Đã tắt hẹn giờ cho máy bơm " + String(pumpIndex) + ", hẹn giờ " + String(timerIndex));
+    } else {
+        // Nếu chuỗi là số, chuyển đổi và gọi SetWateringTimer
+        unsigned long startTimeInSeconds = remaining.toInt();
+        if (startTimeInSeconds > 0) {
+            SetWateringTimer(pumpIndex, timerIndex, startTimeInSeconds);
+            Serial.println("Đã đặt hẹn giờ cho máy bơm " + String(pumpIndex) + ", hẹn giờ " + String(timerIndex) + " vào " + String(startTimeInSeconds) + " giây.");
+        } else {
+            Serial.println("Thời gian không hợp lệ!");
+        }
+    }
+
+    // Xóa chuỗi sau khi xử lý
+    input = "";
+}
+
 
 void checkAndActivateTimers() {
     unsigned long currentSeconds = getSecondsSinceMidnight();

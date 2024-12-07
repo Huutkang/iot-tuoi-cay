@@ -45,15 +45,37 @@ void printSensorValues() {
     }
 }
 
+void updateStatus() {
+
+    for (int i = 0; i < 4; i++) {
+        if (!isAuto[i]) {
+            // Nếu không ở chế độ tự động, bỏ qua máy bơm này
+            continue;
+        }
+
+        if (sensor[i] < 60) {
+            status[i] = true;  // Tưới cây
+        } else if (sensor[i] > 90) {
+            status[i] = false; // Không tưới
+        } else {
+            // Độ ẩm nằm trong khoảng 60-90
+            if (watering_timer[i]) {
+                status[i] = true;       // Tưới cây
+                watering_timer[i] = false; // Reset lại bộ hẹn giờ
+            }
+        }
+    }
+}
+
 
 void setup() {
     Serial.begin(115200);
     setupIrrigation(RL);          // Cấu hình hệ thống tưới cây
-    setupTimeSync();
     initializeTimers();
     setupWiFi();                  // Cấu hình WiFi
-    setupMQTT();                  // Cấu hình MQTT
+    setupMQTT();                 // Cấu hình MQTT
     setupSensors(SCL, SDA);       // Cấu hình cảm biến (ADC: ADS1115)
+    setupTimeSync();
 
     // Ví dụ: Đặt hẹn giờ cho máy bơm 0 vào lúc 08:00:00
     // SetWateringTimer(0, 0, 8 * 3600);
@@ -86,6 +108,8 @@ void loop() {
         manageIrrigation(RL, status);
     }
     if (Timer(&time4,1000)){
+        updateStatus();
+        ProcessTimerString(mqttMessage);
         publishData("abc", "xyz");
     }
     if (Timer(&time5,1000)){

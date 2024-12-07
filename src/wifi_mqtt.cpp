@@ -15,6 +15,7 @@ const char* mqtt_pass = "123456";
 
 // Chủ đề MQTT
 const char* control_topic = "control";
+const char* config_topic = "config";
 
 // Chứng chỉ Root CA
 const char* ca_cert = R"~~~(
@@ -62,6 +63,13 @@ bool mqtt_connected = false;
 
 int count_connect_wifi = 0;
 
+int min_moisture = 60;
+int max_moisture = 90;
+
+// Biến lưu trữ chuỗi MQTT nhận được
+String mqttMessage = "";
+
+
 // Định nghĩa MQTT và Wi-Fi
 WiFiClientSecure espClient;          // Đối tượng WiFiClient
 PubSubClient mqttClient(espClient);  // Đối tượng MQTT client
@@ -85,15 +93,16 @@ void setupWiFi() {
 }
 
 
-// Hàm callback khi nhận dữ liệu từ MQTT
 void callback(char* topic, byte* payload, unsigned int length) {
     String message = "";
     for (int i = 0; i < length; i++) {
         message += (char)payload[i];
     }
 
+    mqttMessage = message; // Lưu lại toàn bộ chuỗi nhận được
+
     if (String(topic) == control_topic) {
-        // Kiểm tra dữ liệu gửi về
+        // Điều khiển relay
         if (message.startsWith("ON")) {
             int relayIndex = message.substring(2).toInt() - 1; // Lấy số relay
             if (relayIndex >= 0 && relayIndex < 4) {
@@ -113,9 +122,23 @@ void callback(char* topic, byte* payload, unsigned int length) {
                 status[relayIndex] = false;    // Đảm bảo relay tắt
             }
         }
+    } else if (String(topic) == config_topic) {
+        // Cập nhật min_moisture và max_moisture
+        if (message.startsWith("MIN:")) {
+            int newMin = message.substring(4).toInt();
+            if (newMin > 0 && newMin < max_moisture) {
+                min_moisture = newMin;
+                Serial.println("Cập nhật min_moisture: " + String(min_moisture));
+            }
+        } else if (message.startsWith("MAX:")) {
+            int newMax = message.substring(4).toInt();
+            if (newMax > min_moisture && newMax <= 100) {
+                max_moisture = newMax;
+                Serial.println("Cập nhật max_moisture: " + String(max_moisture));
+            }
+        }
     }
 }
-
 
 void connect_MQTT() {
     // Thử kết nối MQTT
