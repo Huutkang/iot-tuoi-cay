@@ -49,7 +49,7 @@ void initializeTimers() {
 }
 
 void SetWateringTimer(int pumpIndex, int timerIndex, unsigned long startTimeInSeconds) {
-    if (pumpIndex < 0 || pumpIndex >= 4 || timerIndex < 0 || timerIndex >= 4) {
+    if (pumpIndex < 0 || pumpIndex > 3 || timerIndex < 0 || timerIndex > 3) {
         Serial.println("Chỉ số máy bơm hoặc hẹn giờ không hợp lệ!");
         return;
     }
@@ -69,7 +69,7 @@ void ProcessTimerString(String& input) {
     int timerIndex = input[1] - '0'; // Số thứ hai
 
     // Kiểm tra tính hợp lệ của pumpIndex và timerIndex
-    if (pumpIndex < 0 || pumpIndex >= 4 || timerIndex < 0 || timerIndex >= 4) {
+    if (pumpIndex < 0 || pumpIndex > 3 || timerIndex < 0 || timerIndex > 3) {
         Serial.println("Chỉ số máy bơm hoặc hẹn giờ không hợp lệ!");
         input = ""; // Xóa chuỗi sau khi xử lý
         return;
@@ -104,19 +104,13 @@ void checkAndActivateTimers() {
 
     for (int pump = 0; pump < 4; pump++) {
         for (int timer = 0; timer < 4; timer++) {
-            if (pumpTimers[pump][timer].isActive &&
-                currentSeconds >= pumpTimers[pump][timer].startTime) {
+            if (pumpTimers[pump][timer].isActive && // thời gian hiện tại phải lớn hơn thời gian hẹn giờ thì mới bật máy bơm
+                pumpTimers[pump][timer].startTime +60 > currentSeconds && // nhưng không được lớn hơn quá 1 phút, nếu không là hẹn giờ cho ngày hôm sau
+                currentSeconds >= pumpTimers[pump][timer].startTime) { // làm vậy để cho không bị lỗi là, bây giờ là 6 giờ, hẹn giờ là 1 giờ thì máy bơm bật luôn chứ không phải là 1 h hôm sau mới bật
                 
                 // Kích hoạt hẹn giờ
                 watering_timer[pump] = true;
                 pumpTimers[pump][timer].isActive = false; // Vô hiệu hóa hẹn giờ sau khi kích hoạt
-                
-                // Debug thông tin
-                Serial.printf("Máy bơm %d đã được kích hoạt vào lúc %02lu:%02lu:%02lu\n",
-                              pump,
-                              currentSeconds / 3600,
-                              (currentSeconds % 3600) / 60,
-                              currentSeconds % 60);
             }
         }
     }

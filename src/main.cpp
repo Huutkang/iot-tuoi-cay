@@ -23,7 +23,7 @@ unsigned long time3=0;
 unsigned long time4=0;
 unsigned long time5=0;
 
-int t[4] = {0, 0, 0, 0};
+int t[4] = {max_time[0], max_time[1], max_time[2], max_time[3]};
 int ActivationTime = 60;
 bool count_status[4] = {false, false, false, false};
 
@@ -113,13 +113,15 @@ void loop() {
         for (int i = 0; i < 4; i++) {
             String message = String(i + 1) + " " + String(sensor[i]);
             publishData("RH", message.c_str());
-            Serial.println(message);
+            // Serial.println(message);
         }
+        String pump_status = String(status[0]) + String(status[1]) + String(status[2]) + String(status[3]);
+        publishData("PS", pump_status.c_str());
     }
     if (Timer(&time3,500)){ // thực thi bật tắt máy bơm
         manageIrrigation(RL, status);
     }
-    if (Timer(&time4,1000)){ // xử lí, tính toán
+    if (Timer(&time4,1000)){ // thay đổi trạng thái
         updateStatus(); // thay đổi trạng thái máy bơm
         for (int i=0; i<4; i++){ // kiểm soát thời gian tưới tối đa và thời gian tối thiểu từ khi tắt đến khi bật (chế độ auto)
             if (count_status[i]){

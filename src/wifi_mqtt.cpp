@@ -49,8 +49,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
         message += (char)payload[i];
     }
 
-    mqttMessage = message; // Lưu lại toàn bộ chuỗi nhận được
-
     if (String(topic) == control_topic) {
         if (message.startsWith("ON")) {
             int relayIndex = message.substring(2).toInt() - 1;
@@ -93,6 +91,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
                 max_time[relayIndex] = newMaxTime;
                 Serial.println("Cập nhật max_time[" + String(relayIndex) + "]: " + String(max_time[relayIndex]));
             }
+        }else{
+            mqttMessage = message; // Lưu lại toàn bộ chuỗi nhận được
         }
     }
 }
@@ -104,6 +104,7 @@ void connect_MQTT() {
             mqtt_connected = true;
             Serial.println("Đã kết nối MQTT!");
             mqttClient.subscribe(control_topic);
+            mqttClient.subscribe(config_topic);
         } else {
             Serial.print("Lỗi MQTT: ");
             Serial.println(mqttClient.state());
