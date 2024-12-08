@@ -23,6 +23,11 @@ unsigned long time3=0;
 unsigned long time4=0;
 unsigned long time5=0;
 
+int t[4] = {0, 0, 0, 0};
+int ActivationTime = 60;
+bool count_status[4] = {false, false, false, false};
+
+
 
 int Timer(unsigned long *time, int wait){
     current_time = millis();
@@ -46,21 +51,31 @@ void printSensorValues() {
 }
 
 void updateStatus() {
-
+    
     for (int i = 0; i < 4; i++) {
         if (!isAuto[i]) {
             // Nếu không ở chế độ tự động, bỏ qua máy bơm này
             continue;
         }
 
-        if (sensor[i] < 60) {
-            status[i] = true;  // Tưới cây
-        } else if (sensor[i] > 90) {
+        if (t[i]<0){
+            status[i] = false;
+        }
+
+        if (sensor[i] < min_moisture[i]) {
+            if (!count_status[i]){
+                count_status[i] = true;
+                status[i] = true;
+            }
+        } else if (sensor[i] > max_moisture[i]) {
             status[i] = false; // Không tưới
         } else {
             // Độ ẩm nằm trong khoảng 60-90
             if (watering_timer[i]) {
-                status[i] = true;       // Tưới cây
+                if (!count_status[i]){
+                    count_status[i] = true;
+                    status[i] = true;
+                }
                 watering_timer[i] = false; // Reset lại bộ hẹn giờ
             }
         }
@@ -90,8 +105,12 @@ void setup() {
 //     khi ở chế độ điều khiển bằng tay, người dùng tự bật lên thì tự tắt đi
 //     khi ở chế độ tự động, người dùng lập lịch tưới hàng ngày
 //     có hai giá trị độ ẩm là mix và max. ví dụ min=60 và max=90
-//     nếu độ ẩm bé hơn min thì tưới cây, nếu độ ẩm lớn hơn max thì không tưới, nếu độ ẩm nằm giữa min và mã thì tưới theo lịch
-
+//     nếu độ ẩm bé hơn min thì tưới cây, nếu độ ẩm lớn hơn max thì không tưới, 
+//     nếu độ ẩm nằm giữa min và max thì tưới theo lịch
+//     
+//     khi máy bơm được bật thì nó được tưới tối đa trong khoảng thời gian được lưu trong mảng max_time[4] (auto)
+//     khi máy bơm tắt thì nó phải chờ một khoảng thời gian là ActivationTime mới bật lên lại được (auto)
+//     logic trên được triển khải bằng ActivationTime, t[4], count_status[4]
 
 
 void loop() {
@@ -110,10 +129,21 @@ void loop() {
     if (Timer(&time4,1000)){
         updateStatus();
         ProcessTimerString(mqttMessage);
-        publishData("abc", "xyz");
+        publishData("xyz");
     }
     if (Timer(&time5,1000)){
         checkAndActivateTimers();
+
+        for (int i=0; i++; i<4){
+            if (count_status[i]){
+                t[i]--;
+            }
+            if (t[i]<-ActivationTime){
+                count_status[i]=false;
+                t[i]=max_time[i];
+            }
+        }
+
         // In thời gian hiện tại (test)
         Serial.println("Current time: ");
         Serial.println(getCurrentTime());

@@ -12,14 +12,18 @@ const char* mqtt_pass = "123456";
 // Chủ đề MQTT
 const char* control_topic = "control";
 const char* config_topic = "config";
+const char* view_topic = "view";
+
 
 bool isAuto[4] = {true, true, true, true};  // true: AUTO, false: not AUTO
 bool status[4] = {false, false, false, false};
 bool mqtt_connected = false;
 
 int count_connect_wifi = 0;
-int min_moisture = 60;
-int max_moisture = 90;
+int min_moisture[4] = {60, 60, 60, 60};
+int max_moisture[4] = {90, 90, 90, 90};
+int max_time[4] = {60, 60, 60, 60};
+
 
 // Biến lưu trữ chuỗi MQTT nhận được
 String mqttMessage = "";
@@ -69,17 +73,26 @@ void callback(char* topic, byte* payload, unsigned int length) {
             }
         }
     } else if (String(topic) == config_topic) {
-        if (message.startsWith("MIN:")) {
-            int newMin = message.substring(4).toInt();
-            if (newMin > 0 && newMin < max_moisture) {
-                min_moisture = newMin;
-                Serial.println("Cập nhật min_moisture: " + String(min_moisture));
+        if (message.startsWith("MIN")) {
+            int relayIndex = message.substring(3, 4).toInt() - 1;
+            int newMin = message.substring(5).toInt();
+            if (relayIndex >= 0 && relayIndex < 4 && newMin > 0 && newMin < max_moisture[relayIndex]) {
+                min_moisture[relayIndex] = newMin;
+                Serial.println("Cập nhật min_moisture[" + String(relayIndex) + "]: " + String(min_moisture[relayIndex]));
             }
-        } else if (message.startsWith("MAX:")) {
-            int newMax = message.substring(4).toInt();
-            if (newMax > min_moisture && newMax <= 100) {
-                max_moisture = newMax;
-                Serial.println("Cập nhật max_moisture: " + String(max_moisture));
+        } else if (message.startsWith("MAX")) {
+            int relayIndex = message.substring(3, 4).toInt() - 1;
+            int newMax = message.substring(5).toInt();
+            if (relayIndex >= 0 && relayIndex < 4 && newMax > min_moisture[relayIndex] && newMax <= 100) {
+                max_moisture[relayIndex] = newMax;
+                Serial.println("Cập nhật max_moisture[" + String(relayIndex) + "]: " + String(max_moisture[relayIndex]));
+            }
+        } else if (message.startsWith("TM")) {
+            int relayIndex = message.substring(2, 3).toInt() - 1;
+            int newMaxTime = message.substring(4).toInt();
+            if (relayIndex >= 0 && relayIndex < 4 && newMaxTime > 0) {
+                max_time[relayIndex] = newMaxTime;
+                Serial.println("Cập nhật max_time[" + String(relayIndex) + "]: " + String(max_time[relayIndex]));
             }
         }
     }
@@ -110,16 +123,16 @@ void connect_MQTT() {
 }
 
 void setupMQTT() {
-    espClient.setInsecure(); // Vô hiệu hóa bảo mật SSL/TLS
+    espClient.setInsecure();
     mqttClient.setServer(mqtt_server, mqtt_port);
     mqttClient.setCallback(callback);
     connect_MQTT();
 }
 
-bool publishData(const char* topic, const char* payload) {
+bool publishData(const char* payload) {
     mqttClient.loop();
     if (mqttClient.connected()) {
-        mqttClient.publish(topic, payload);
+        mqttClient.publish(view_topic, payload);
         return true;
     } else {
         mqtt_connected = false;
