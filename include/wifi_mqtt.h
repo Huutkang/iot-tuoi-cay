@@ -15,7 +15,7 @@ extern String mqttMessage;
 void setupWiFi();
 void setupMQTT();
 void connect_MQTT();
-bool publishData(const char* payload);
+bool publishData(const char* topic, const char* payload);
 void ProcessTimerString(const String& input);
 void handleMQTT();
 

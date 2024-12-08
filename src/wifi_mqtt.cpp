@@ -129,7 +129,7 @@ void setupMQTT() {
     connect_MQTT();
 }
 
-bool publishData(const char* payload) {
+bool publishData(const char* topic, const char* payload) {
     mqttClient.loop();
     if (mqttClient.connected()) {
         mqttClient.publish(view_topic, payload);

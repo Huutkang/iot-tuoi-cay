@@ -115,30 +115,26 @@ void setup() {
 
 void loop() {
     handleMQTT();                 // Xử lý kết nối MQTT
-    if (Timer(&time1, 3000)){
+    if (Timer(&time1, 3000)){ // kết nối lại mqtt, wifi
         if(!mqtt_connected){
             connect_MQTT();
         }
     }
-    if (Timer(&time2,5000)){
+    if (Timer(&time2,5000)){ // đọc cảm biến
         readSensors();                
         for (int i = 0; i <4; i++){
             Serial.println(sensor[i]);
         }
     }
-    if (Timer(&time3,500)){
+    if (Timer(&time3,500)){ // thực thi bật tắt máy bơm
         manageIrrigation(RL, status);
     }
-    if (Timer(&time4,1000)){
-        updateStatus();
-        ProcessTimerString(mqttMessage);
-        
-        
-    }
-    if (Timer(&time5,1000)){
-        checkAndActivateTimers();
+    if (Timer(&time4,1000)){ // xử lí, tính toán
+        updateStatus(); // thay đổi trang thái máy bơm
+        ProcessTimerString(mqttMessage); // hẹn giờ bơm
+        checkAndActivateTimers();  // kích hoạt các máy bơm đã hẹn giờ
 
-        for (int i=0; i++; i<4){
+        for (int i=0; i<4; i++){ // kiểm soát thời gian tưới tối đa và thời gian tối thiểu từ khi tắt đến khi bật (chế độ auto)
             if (count_status[i]){
                 t[i]--;
             }
@@ -147,14 +143,18 @@ void loop() {
                 t[i]=max_time[i];
             }
         }
-
+    }
+    if (Timer(&time5,1000)){ // thông báo qua mqtt và Serial
         // In thời gian hiện tại (test)
-        Serial.println("Current time: ");
+        Serial.print("Current time: ");
         Serial.println(getCurrentTime());
-
-        // In số giây từ đầu ngày (test)
-        Serial.println("Seconds since midnight: ");
-        Serial.println(getSecondsSinceMidnight());
+        for (int i = 0; i < 4; i++) {
+            // Tạo chuỗi dữ liệu dưới dạng "Relay 1: Giá trị cảm biến"
+            String message = String(i + 1) + " " + String(sensor[i]);
+            publishData("RH", message.c_str());
+            Serial.println(message);
+        }
+        
     }
     // Đồng bộ thời gian mỗi 15 phút
     updateTimeSync();
