@@ -120,13 +120,10 @@ void loop() {
         manageIrrigation(RL, status);
     }
     if (Timer(&time4,1000)){ // xử lí, tính toán
-        updateStatus(); // thay đổi trang thái máy bơm
-        ProcessTimerString(mqttMessage); // hẹn giờ bơm
-        checkAndActivateTimers();  // kích hoạt các máy bơm đã hẹn giờ
-
+        updateStatus(); // thay đổi trạng thái máy bơm
         for (int i=0; i<4; i++){ // kiểm soát thời gian tưới tối đa và thời gian tối thiểu từ khi tắt đến khi bật (chế độ auto)
             if (count_status[i]){
-                t[i]--;
+                t[i]--; // bắt buộc để timer ở đây là 1 giây để hoạt động bình thường
             }
             if (t[i]<-ActivationTime){
                 count_status[i]=false;
@@ -134,12 +131,9 @@ void loop() {
             }
         }
     }
-    if (Timer(&time5,1000)){ // test
-        // In thời gian hiện tại (test)
-        Serial.print("Current time: ");
-        Serial.println(getCurrentTime());
-        
-        
+    if (Timer(&time5,990)){ // hẹn giờ
+        ProcessTimerString(mqttMessage); // hẹn giờ bơm
+        checkAndActivateTimers();  // kích hoạt các máy bơm đã hẹn giờ
     }
     // Đồng bộ thời gian mỗi 15 phút
     updateTimeSync();
