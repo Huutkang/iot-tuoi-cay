@@ -121,7 +121,10 @@ void loop() {
         }
     }
     if (Timer(&time2,5000)){
-        readSensors();                // Đọc cảm biến và gửi dữ liệu
+        readSensors();                
+        for (int i = 0; i <4; i++){
+            Serial.println(sensor[i]);
+        }
     }
     if (Timer(&time3,500)){
         manageIrrigation(RL, status);
@@ -129,7 +132,8 @@ void loop() {
     if (Timer(&time4,1000)){
         updateStatus();
         ProcessTimerString(mqttMessage);
-        publishData("xyz");
+        
+        
     }
     if (Timer(&time5,1000)){
         checkAndActivateTimers();
