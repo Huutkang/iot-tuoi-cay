@@ -12,7 +12,6 @@ const char* mqtt_pass = "123456";
 // Chủ đề MQTT
 const char* control_topic = "control";
 const char* config_topic = "config";
-const char* view_topic = "view";
 
 
 bool isAuto[4] = {true, true, true, true};  // true: AUTO, false: not AUTO
@@ -132,7 +131,7 @@ void setupMQTT() {
 bool publishData(const char* topic, const char* payload) {
     mqttClient.loop();
     if (mqttClient.connected()) {
-        mqttClient.publish(view_topic, payload);
+        mqttClient.publish(topic, payload);
         return true;
     } else {
         mqtt_connected = false;
