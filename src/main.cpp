@@ -40,24 +40,12 @@ int Timer(unsigned long *time, int wait){
     }
 }
 
-// test
-void printSensorValues() {
-    for (int i = 0; i < 4; i++) {
-        Serial.print("Sensor[");
-        Serial.print(i);
-        Serial.print("]: ");
-        Serial.println(sensor[i]); // In giá trị của từng phần tử
-    }
-}
-
 void updateStatus() {
-    
     for (int i = 0; i < 4; i++) {
         if (!isAuto[i]) {
             // Nếu không ở chế độ tự động, bỏ qua máy bơm này
             continue;
         }
-
         if (t[i]<0){
             status[i] = false;
         }
@@ -120,10 +108,12 @@ void loop() {
             connect_MQTT();
         }
     }
-    if (Timer(&time2,5000)){ // đọc cảm biến
+    if (Timer(&time2,5000)){ // đọc, gửi, in giá trị cảm biến
         readSensors();                
-        for (int i = 0; i <4; i++){
-            Serial.println(sensor[i]);
+        for (int i = 0; i < 4; i++) {
+            String message = String(i + 1) + " " + String(sensor[i]);
+            publishData("RH", message.c_str());
+            Serial.println(message);
         }
     }
     if (Timer(&time3,500)){ // thực thi bật tắt máy bơm
@@ -144,16 +134,11 @@ void loop() {
             }
         }
     }
-    if (Timer(&time5,1000)){ // thông báo qua mqtt và Serial
+    if (Timer(&time5,1000)){ // test
         // In thời gian hiện tại (test)
         Serial.print("Current time: ");
         Serial.println(getCurrentTime());
-        for (int i = 0; i < 4; i++) {
-            // Tạo chuỗi dữ liệu dưới dạng "Relay 1: Giá trị cảm biến"
-            String message = String(i + 1) + " " + String(sensor[i]);
-            publishData("RH", message.c_str());
-            Serial.println(message);
-        }
+        
         
     }
     // Đồng bộ thời gian mỗi 15 phút

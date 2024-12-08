@@ -29,7 +29,6 @@ float readChannel(ADS1115_MUX channel) {
     adc.setCompareChannels(channel);
     adc.startSingleMeasurement();
     voltage = adc.getResult_mV();
-    Serial.println(voltage);
     return voltage;
 }
 
