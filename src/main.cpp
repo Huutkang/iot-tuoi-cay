@@ -28,7 +28,7 @@ int ActivationTime = 60;
 bool count_status[4] = {false, false, false, false};
 
 
-
+// với kiểu dữ liệu unsigned long: 10 - 4294967295 = 11 nên không lo tràn số ở hàm millis nhé
 int Timer(unsigned long *time, int wait){
     current_time = millis();
     if (current_time-*time>wait){
