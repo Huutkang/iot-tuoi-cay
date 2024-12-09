@@ -108,7 +108,7 @@ void loop() {
             connect_MQTT();
         }
     }
-    if (Timer(&time2,200)){ // đọc, gửi, in giá trị cảm biến
+    if (Timer(&time2,5000)){ // đọc, gửi, in giá trị cảm biến
         readSensors();                
         for (int i = 0; i < 4; i++) {
             String message = String(i + 1) + " " + String(sensor[i]);
