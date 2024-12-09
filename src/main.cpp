@@ -50,12 +50,12 @@ void updateStatus() {
             status[i] = false;
         }
 
-        if (sensor[i] < min_moisture[i]) {
+        if (sensor[i] <= min_moisture[i]) {
             if (!count_status[i]){
                 count_status[i] = true;
                 status[i] = true;
             }
-        } else if (sensor[i] > max_moisture[i]) {
+        } else if (sensor[i] >= max_moisture[i]) {
             status[i] = false; // Không tưới
         } else {
             // Độ ẩm nằm trong khoảng 60-90
