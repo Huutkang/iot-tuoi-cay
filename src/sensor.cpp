@@ -36,9 +36,10 @@ float readChannel(int channel) {
 void readSensors() {
     float reading[4];
     // Đọc giá trị thô từ các kênh
-    int i = 0;
+    for (int i = 0; i < 4; i++) {
         reading[i] = readChannel(i);
         reading[i] = map(reading[i], sensorDry[i], sensorWet[i], 0, 100);
         sensor[i] = tf * reading[i] + (1 - tf) * sensor[i];
         sensor[i] = constrain(sensor[i], 0, 100);
+    }
 }
