@@ -73,7 +73,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
         if (message.startsWith("MIN")) {
             int relayIndex = message.substring(3, 4).toInt() - 1;
             int newMin = message.substring(5).toInt();
-            if (relayIndex >= 0 && relayIndex < 4 && newMin > 0 && newMin < max_moisture[relayIndex]) {
+            if (relayIndex >= 0 && relayIndex < 4 && newMin > 0 && newMin <= max_moisture[relayIndex]) {
                 min_moisture[relayIndex] = newMin;
                 Serial.println("Cập nhật min_moisture[" + String(relayIndex) + "]: " + String(min_moisture[relayIndex]));
             }
