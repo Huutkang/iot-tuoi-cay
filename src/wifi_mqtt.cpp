@@ -4,9 +4,9 @@
 #include <WiFiManager.h>
 
 // Cấu hình HiveMQ Broker
-const char* mqtt_server = "49a545dc4fd24e5d97494e55f3b23d50.s1.eu.hivemq.cloud";
+const char* mqtt_server = "9812a8f30e3c404fa505703bbdce4b3b.s1.eu.hivemq.cloud";
 const int mqtt_port = 8883;
-const char* mqtt_user = "scime";
+const char* mqtt_user = "vuduychien";
 const char* mqtt_pass = "123456aA";
 
 // Chủ đề MQTT

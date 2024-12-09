@@ -77,7 +77,7 @@ void setup() {
     initializeTimers();
     setupWiFi();                  // Cấu hình WiFi
     setupMQTT();                 // Cấu hình MQTT
-    setupSensors(SCL, SDA);       // Cấu hình cảm biến (ADC: ADS1115)
+    setupSensors();       // Cấu hình cảm biến (ADC: ADS1115)
     setupTimeSync();
 
     // Ví dụ: Đặt hẹn giờ cho máy bơm 0 vào lúc 08:00:00
@@ -108,7 +108,7 @@ void loop() {
             connect_MQTT();
         }
     }
-    if (Timer(&time2,5000)){ // đọc, gửi, in giá trị cảm biến
+    if (Timer(&time2,200)){ // đọc, gửi, in giá trị cảm biến
         readSensors();                
         for (int i = 0; i < 4; i++) {
             String message = String(i + 1) + " " + String(sensor[i]);

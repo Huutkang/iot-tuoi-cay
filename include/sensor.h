@@ -6,7 +6,7 @@ extern float sensor[4];
 // extern float sensorDry[4];
 // extern float sensorWet[4];
 
-void setupSensors(int SCL, int SDA);
+void setupSensors();
 void readSensors();
 
 #endif
