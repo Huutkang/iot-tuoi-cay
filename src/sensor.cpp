@@ -7,8 +7,8 @@
 Adafruit_ADS1115 adc; // Sử dụng thư viện Adafruit ADS1115
 float tf = 0.1;                                 // Yếu tố tin cậy để làm mịn bộ lọc
 float sensor[4] = {100, 100, 100, 100};         // Đặt giá trị bắt đầu cao nhất để tránh các kích hoạt không mong muốn
-float sensorDry[4] = {10034, 9943, 9993, 10057};  // Đọc từ khi nổi lên hoàn toàn trong nước
-float sensorWet[4] = {20321, 20395, 20400, 20376};  // Đọc từ khi ở trong không khí 'khô'
+float sensorDry[4] = {10034, 10043, 10093, 10057};  // Đọc từ khi nổi lên hoàn toàn trong nước
+float sensorWet[4] = {20571, 20595, 20540, 20576};  // Đọc từ khi ở trong không khí 'khô'
 
 // Khởi tạo các cảm biến
 void setupSensors() {
@@ -27,7 +27,6 @@ float readChannel(int channel) {
         return 0.0;
     }
     int16_t adcValue = adc.readADC_SingleEnded(channel);
-    Serial.println(adcValue);
     return adcValue;
 }
 
@@ -37,8 +36,8 @@ void readSensors() {
     // Đọc giá trị thô từ các kênh
     for (int i = 0; i < 4; i++) {
         reading[i] = readChannel(i);
-        reading[i] = map(reading[i], sensorDry[i], sensorWet[i], 0, 100);
-        sensor[i] = tf * reading[i] + (1 - tf) * sensor[i];
-        sensor[i] = constrain(sensor[i], 0, 100);
+        reading[i] = map(reading[i], sensorDry[i], sensorWet[i], 100, 0);
+        sensor[i] = constrain(reading[i], 0, 100);
+        // sensor[i] = reading[i]; //test
     }
 }
