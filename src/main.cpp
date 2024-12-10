@@ -113,7 +113,6 @@ void loop() {
         for (int i = 0; i < 4; i++) {
             String message = String(i + 1) + " " + String(sensor[i]);
             publishData("RH", message.c_str());
-            // Serial.println(message);
         }
         String pump_status = String(status[0]) + String(status[1]) + String(status[2]) + String(status[3]);
         publishData("PS", pump_status.c_str());
@@ -121,7 +120,7 @@ void loop() {
     if (Timer(&time3,500)){ // thực thi bật tắt máy bơm
         manageIrrigation(RL, status);
     }
-    if (Timer(&time4,1000)){ // thay đổi trạng thái
+    if (Timer(&time4,990)){ // thay đổi trạng thái
         updateStatus(); // thay đổi trạng thái máy bơm
         for (int i=0; i<4; i++){ // kiểm soát thời gian tưới tối đa và thời gian tối thiểu từ khi tắt đến khi bật (chế độ auto)
             if (count_status[i]){
@@ -133,7 +132,7 @@ void loop() {
             }
         }
     }
-    if (Timer(&time5,990)){ // hẹn giờ
+    if (Timer(&time5,991)){ // hẹn giờ
         ProcessTimerString(mqttMessage); // hẹn giờ bơm
         checkAndActivateTimers();  // kích hoạt các máy bơm đã hẹn giờ
     }

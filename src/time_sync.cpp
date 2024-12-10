@@ -50,7 +50,7 @@ void initializeTimers() {
 
 void SetWateringTimer(int pumpIndex, int timerIndex, unsigned long startTimeInSeconds) {
     if (pumpIndex < 0 || pumpIndex > 3 || timerIndex < 0 || timerIndex > 3) {
-        Serial.println("Chỉ số máy bơm hoặc hẹn giờ không hợp lệ!");
+        // Serial.println("Chỉ số máy bơm hoặc hẹn giờ không hợp lệ!");
         return;
     }
     pumpTimers[pumpIndex][timerIndex].startTime = startTimeInSeconds;
@@ -70,7 +70,7 @@ void ProcessTimerString(String& input) {
 
     // Kiểm tra tính hợp lệ của pumpIndex và timerIndex
     if (pumpIndex < 0 || pumpIndex > 3 || timerIndex < 0 || timerIndex > 3) {
-        Serial.println("Chỉ số máy bơm hoặc hẹn giờ không hợp lệ!");
+        // Serial.println("Chỉ số máy bơm hoặc hẹn giờ không hợp lệ!");
         input = ""; // Xóa chuỗi sau khi xử lý
         return;
     }
@@ -82,15 +82,15 @@ void ProcessTimerString(String& input) {
     if (remaining == "off") {
         // Nếu chuỗi là "off", tắt bộ hẹn giờ
         pumpTimers[pumpIndex][timerIndex].isActive = false;
-        Serial.println("Đã tắt hẹn giờ cho máy bơm " + String(pumpIndex) + ", hẹn giờ " + String(timerIndex));
+        // Serial.println("Đã tắt hẹn giờ cho máy bơm " + String(pumpIndex) + ", hẹn giờ " + String(timerIndex));
     } else {
         // Nếu chuỗi là số, chuyển đổi và gọi SetWateringTimer
         unsigned long startTimeInSeconds = remaining.toInt();
         if (startTimeInSeconds > 0) {
             SetWateringTimer(pumpIndex, timerIndex, startTimeInSeconds);
-            Serial.println("Đã đặt hẹn giờ cho máy bơm " + String(pumpIndex) + ", hẹn giờ " + String(timerIndex) + " vào " + String(startTimeInSeconds) + " giây.");
+            // Serial.println("Đã đặt hẹn giờ cho máy bơm " + String(pumpIndex) + ", hẹn giờ " + String(timerIndex) + " vào " + String(startTimeInSeconds) + " giây.");
         } else {
-            Serial.println("Thời gian không hợp lệ!");
+            // Serial.println("Thời gian không hợp lệ!");
         }
     }
 

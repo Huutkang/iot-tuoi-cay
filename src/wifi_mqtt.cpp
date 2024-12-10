@@ -36,11 +36,11 @@ void setupWiFi() {
 
     // Tự động kết nối hoặc tạo Access Point
     if (!wifiManager.autoConnect("ESP8266_AP")) {
-        Serial.println("Không kết nối được Wi-Fi");
+        // Serial.println("Không kết nối được Wi-Fi");
         delay(3000);
         ESP.restart();  // Khởi động lại thiết bị
     }
-    Serial.println("Đã kết nối Wi-Fi!");
+    // Serial.println("Đã kết nối Wi-Fi!");
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -75,21 +75,21 @@ void callback(char* topic, byte* payload, unsigned int length) {
             int newMin = message.substring(5).toInt();
             if (relayIndex >= 0 && relayIndex < 4 && newMin > 0 && newMin <= max_moisture[relayIndex]) {
                 min_moisture[relayIndex] = newMin;
-                Serial.println("Cập nhật min_moisture[" + String(relayIndex) + "]: " + String(min_moisture[relayIndex]));
+                // Serial.println("Cập nhật min_moisture[" + String(relayIndex) + "]: " + String(min_moisture[relayIndex]));
             }
         } else if (message.startsWith("MAX")) {
             int relayIndex = message.substring(3, 4).toInt() - 1;
             int newMax = message.substring(5).toInt();
             if (relayIndex >= 0 && relayIndex < 4 && newMax > min_moisture[relayIndex] && newMax <= 100) {
                 max_moisture[relayIndex] = newMax;
-                Serial.println("Cập nhật max_moisture[" + String(relayIndex) + "]: " + String(max_moisture[relayIndex]));
+                // Serial.println("Cập nhật max_moisture[" + String(relayIndex) + "]: " + String(max_moisture[relayIndex]));
             }
         } else if (message.startsWith("TM")) {
             int relayIndex = message.substring(2, 3).toInt() - 1;
             int newMaxTime = message.substring(4).toInt();
             if (relayIndex >= 0 && relayIndex < 4 && newMaxTime > 0) {
                 max_time[relayIndex] = newMaxTime;
-                Serial.println("Cập nhật max_time[" + String(relayIndex) + "]: " + String(max_time[relayIndex]));
+                // Serial.println("Cập nhật max_time[" + String(relayIndex) + "]: " + String(max_time[relayIndex]));
             }
         }else{
             mqttMessage = message; // Lưu lại toàn bộ chuỗi nhận được
@@ -102,15 +102,15 @@ void connect_MQTT() {
         Serial.print("Đang kết nối MQTT...");
         if (mqttClient.connect("ESP8266Client", mqtt_user, mqtt_pass)) {
             mqtt_connected = true;
-            Serial.println("Đã kết nối MQTT!");
+            // Serial.println("Đã kết nối MQTT!");
             mqttClient.subscribe(control_topic);
             mqttClient.subscribe(config_topic);
         } else {
             Serial.print("Lỗi MQTT: ");
-            Serial.println(mqttClient.state());
+            // Serial.println(mqttClient.state());
             if (WiFi.status() != WL_CONNECTED || count_connect_wifi > 5) {
                 count_connect_wifi = 0;
-                Serial.println("Lỗi wifi");
+                // Serial.println("Lỗi wifi");
                 WiFi.reconnect();
             } else {
                 count_connect_wifi++;
